@@ -37,15 +37,8 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "target/*.jar"
           target: "/home/deployer/"
-          strip_components: 1
-      - name: Rename uploaded JAR
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.SERVER_IP }}
-          username: deployer
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            mv ~/target/*.jar ~/authserver.jar
+
+
 
       - name: Restart Spring Boot Service
         uses: appleboy/ssh-action@v1.0.0
