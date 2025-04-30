@@ -7,10 +7,9 @@ import com.example.authserver.service.JwtService;
 import com.example.authserver.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
 
 @RestController
 public class AuthController {
@@ -42,9 +41,12 @@ public class AuthController {
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.BAD_GATEWAY).build()));
     }
 
-    @GetMapping("/hi")
-    public Mono<String> hi() {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(ctx -> "hi + " + ctx.getAuthentication().getName());
+    @PostMapping("/getRegisteredUsers")
+    public Mono<ResponseEntity<Users>> getUsers(@RequestBody Users us) {
+        return userRepo.findByUserName(us.getUserName())
+                .map(user -> new ResponseEntity<>(user, HttpStatus.OK))
+                .switchIfEmpty(Mono.just(new ResponseEntity<>(null, HttpStatus.NOT_FOUND)))
+                .onErrorResume(e -> Mono.just(new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR)));
+
     }
 }
