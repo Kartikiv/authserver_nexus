@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @RestController
 public class AuthController {
@@ -49,4 +52,22 @@ public class AuthController {
                 .onErrorResume(e -> Mono.just(new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR)));
 
     }
+
+    @PostMapping("/filterRegisteredUsers")
+    public Mono<ResponseEntity<List<String>>> filterRegisteredUsers(@RequestBody List<String> phoneNumbers) {
+        return userRepo.findByUserNameIn(phoneNumbers)
+                .collectList()
+                .map(users -> {
+                    List<String> matched = users.stream()
+                            .map(Users::getUserName)
+                            .collect(Collectors.toList());
+                    return ResponseEntity.ok(matched);
+                });
+    }
+
+
+
+
+
+
 }
